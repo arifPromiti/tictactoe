@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [GameController::class, 'index']);
-Route::post('/startNewGame/{id}', [GameController::class, 'startGame']);
+Route::post('/startNewGame/', [GameController::class, 'startGame']);
 Route::post('/set-move/', [GameController::class, 'createMove']);
-Route::post('/check-turn/', [GameController::class, 'checkTurn']);
+Route::get('/check-turn/', [GameController::class, 'checkTurn']);
+Route::get('/load-game-Board/', [GameController::class, 'gameBoard'])->name('Game.bord');

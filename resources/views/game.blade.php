@@ -5,6 +5,23 @@
         .container {
             margin-top: 30px;
         }
+
+        .card{
+            padding: 5px;
+        }
+
+        .tiles{
+            height: 80px;
+            width: 80px;
+            border: 2px solid #0b2e13;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .tilece-a{
+            display: inline-block;
+            text-decoration: none;
+        }
     </style>
     <div class="container">
         <div class="row">
@@ -12,12 +29,12 @@
             @foreach($players as $row)
                 @if($i++ == 1)
                     <div class="col-md-4">
-                        Player 1 : {{ $row->name }}
+                        Player 1 : {{ $row->name }}<br>
                         Sign : {{ $row->sign }}
                     </div>
                 @else
                     <div class="offset-3 col-md-4">
-                        Player 1 : {{ $row->name }}
+                        Player 2 : {{ $row->name }}<br>
                         Sign : {{ $row->sign }}
                     </div>
                 @endif
@@ -32,13 +49,14 @@
                     </div>
                     <div class="body">
                         <input type="hidden" id="player" >
-                        @for($i = 0; $i < $gameInfo; $i++)
-                            @for($j = 0; $j < $gameInfo; $j++)
-                                @php $a = 'A'; @endphp
-                                <a href="javascript:makeMove();"><div id="{{ $i.$a++ }}" class="tiles"></div></a>
+                        <div align="center">
+                            @for($i = 0; $i < $gameInfo->bordLength; $i++)
+                                @for($j = 0; $j < $gameInfo->bordLength; $j++)
+                                    <a class="tilece-a" href="javascript:makeMove({{ $i.','.$j }});"><div id="{{ $i.$j }}" class="tiles"></div></a>
+                                @endfor
+                                <br>
                             @endfor
-                            <br>
-                        @endfor
+                        </div>
                     </div>
                 </div>
             </div>
@@ -58,24 +76,26 @@
                 datatype: 'json',
                 type: 'get',
                 success: function (data){
-
+                    $('#player').val(data.id)
+                    alert(data.name + 's turn');
                 }
             });
         }
 
-        function makeMove(){
-            $.ajax({
-                url: '{{ url("/set-move/") }}',
-                datatype: 'json',
-                type: 'post',
-                data: {
-                    'name': name,
-                    '_token': '{{ csrf_token() }}'
-                },
-                success: function (data) {
+        function makeMove(x,y){
+            console.log(x,y);
+            {{--$.ajax({--}}
+            {{--    url: '{{ url("/set-move/") }}',--}}
+            {{--    datatype: 'json',--}}
+            {{--    type: 'post',--}}
+            {{--    data: {--}}
+            {{--        'name': name,--}}
+            {{--        '_token': '{{ csrf_token() }}'--}}
+            {{--    },--}}
+            {{--    success: function (data) {--}}
 
-                }
-            });
+            {{--    }--}}
+            {{--});--}}
         }
     </script>
 @endsection

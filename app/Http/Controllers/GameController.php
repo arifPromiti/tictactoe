@@ -18,7 +18,7 @@ class GameController extends Controller
         return view('start');
     }
 
-    public function startGame(Request $request,$id){
+    public function startGame(Request $request){
         $validator = Validator::make($request->all(),[
             '1stPlayer' => ['required'],
             '2ndPlayer' => ['required'],
@@ -35,7 +35,7 @@ class GameController extends Controller
 
             DB::beginTransaction();
             try {
-                Game::where('id','=',$id)->update([
+                Game::where('id','=',1)->update([
                                                 'bordLength' => $bordLength,
                                                 'max_move' => $bordLength,
                                                 'status' => 1
@@ -46,27 +46,25 @@ class GameController extends Controller
                                     'name' => $player1,
                                     'status' => $status
                                 ]);
+                GameHistory::where('status','=',0)->delete();
 
-                Player::where('id','=',2)->update([
-                                        'name' => $player2,
-                                        'status' => ($status == 1)?$status:0
-                                    ]);
-
-                $result = GameHistory::truncate();
-
+                $result = Player::where('id','=',2)->update([
+                                            'name' => $player2,
+                                            'status' => ($status == 1)?0:1
+                                        ]);
                 DB::commit();
             }catch(Exception $e){
                 DB::rollback();
-                return ['error' => 'Please check the info !'];
+                return Redirect::back()->withErrors($e)->withInput();
             }
 
-            if($result == true){
-                $this->gameBord();
+            if($result){
+               return Redirect::route('Game.bord');
             }
         }
     }
 
-    public function gameBord(){
+    public function gameBoard(){
         $gameInfo = Game::where('id','=',1)->first();
         $players = Player::all();
         return view('game', compact('gameInfo','players'));
@@ -99,7 +97,7 @@ class GameController extends Controller
                 return ['error' => 'Please check the info !'];
             }
 
-            if($result == true){
+            if($result){
                 return ['success' => $result];
             }
         }

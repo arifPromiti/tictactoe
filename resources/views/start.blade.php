@@ -1,15 +1,6 @@
 @extends('layout.main-layout')
 
 @section('content')
-    <style>
-        .card{
-            padding: 5px;
-        }
-
-        .container {
-            margin-top: 30px;
-        }
-    </style>
     <div class="container">
         <div class="row">
             <div class="offset-md-2 col-md-4 ">
@@ -44,7 +35,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="passMark">Bord Length</label>
-                                                <input type="number" name="bordLength" id="bordLength" class="form-control" placeholder="Max 10." required>
+                                                <input type="number" name="bordLength" id="bordLength" class="form-control" value="3" placeholder="Max 10." required>
                                             </div>
                                         </div>
                                     </div>
@@ -71,7 +62,12 @@
         }
 
         function saveGameConfig(){
-            $('#gameConfigForm').submit();
+            var bordLength = parseInt($('#bordLength').val());
+            if(bordLength > 2 && bordLength < 11){
+                $('#gameConfigForm').submit();
+            }else{
+                alert('Board length can not be smaller then 3 and greater then 10');
+            }
         }
     </script>
 @endsection

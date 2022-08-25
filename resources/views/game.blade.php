@@ -2,25 +2,18 @@
 
 @section('content')
     <style>
-        .container {
-            margin-top: 30px;
+        .card .body{
+            padding: 15px;
         }
 
-        .card{
-            padding: 5px;
+        .player1{
+            background-image: url("{{ asset('assets/img/player1.png') }}");
+            background-size: cover;
         }
 
-        .tiles{
-            height: 80px;
-            width: 80px;
-            border: 2px solid #0b2e13;
-            text-align: center;
-            font-size: 18px;
-        }
-
-        .tilece-a{
-            display: inline-block;
-            text-decoration: none;
+        .player2{
+            background-image: url("{{ asset('assets/img/player2.png') }}");
+            background-size: cover;
         }
     </style>
     <div class="container">
@@ -29,13 +22,13 @@
             @foreach($players as $row)
                 @if($i++ == 1)
                     <div class="col-md-4">
-                        Player 1 : {{ $row->name }}<br>
-                        Sign : {{ $row->sign }}
+                        <h2>Player 1 : {{ $row->name }}</h2>
+                        <h4>Sign : {{ $row->sign }}</h4>
                     </div>
                 @else
                     <div class="offset-3 col-md-4">
-                        Player 2 : {{ $row->name }}<br>
-                        Sign : {{ $row->sign }}
+                        <h2>Player 2 : {{ $row->name }}</h2>
+                        <h4>Sign : {{ $row->sign }}</h4>
                     </div>
                 @endif
             @endforeach
@@ -45,10 +38,11 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="header">
-                        <h2><strong>Tic Tac Toe</strong> Board <button type="button" class="close" data-dismiss="modal"> Reset</button></h2>
+                        <h2><strong>Tic Tac Toe</strong> Board ( {{ $gameInfo->bordLength.' X '.$gameInfo->bordLength }} )<a class="close" href="javascript:resetGame();"> Reset</a></h2>
                     </div>
                     <div class="body">
                         <input type="hidden" id="player" >
+                        <input type="hidden" id="gameStatus" value="{{ $gameInfo->status }}" >
                         <div align="center">
                             @for($i = 0; $i < $gameInfo->bordLength; $i++)
                                 @for($j = 0; $j < $gameInfo->bordLength; $j++)
@@ -76,8 +70,42 @@
                 datatype: 'json',
                 type: 'get',
                 success: function (data){
-                    $('#player').val(data.id)
+                    $('#player').val(data.id);
                     alert(data.name + 's turn');
+                }
+            });
+        }
+
+        function resetGame(){
+            $.ajax({
+                url: '{{ url("/game-reset/") }}',
+                datatype: 'json',
+                type: 'get',
+                success: function (data){
+                    if(data.success){
+                        alert(data.success);
+                        location.reload(true);
+                    }else{
+                        console.log(data.error);
+                    }
+                }
+            });
+        }
+
+        function checkResult(id,x,y){
+            $.ajax({
+                url: '{{ url("/check-result/") }}/'+id +'/'+x +'/'+ y,
+                datatype: 'json',
+                type: 'get',
+                success: function(data){
+                    if(data.success){
+                        $('#gameStatus').val(2);
+                        alert(data.success);
+                    }else if(data.sorry){
+                        $('#gameStatus').val(3);
+                    }else{
+                        checkTurn();
+                    }
                 }
             });
         }
@@ -85,32 +113,35 @@
         function makeMove(x,y){
             console.log(x,y);
             var player = $('#player').val();
+            var status = $('#gameStatus').val();
 
-            if(player == 1){
-               var sign = 'green';
-            }else{
-                var sign = 'red';
-            }
-
-            $.ajax({
-                url: '{{ url("/set-move/") }}',
-                datatype: 'json',
-                type: 'post',
-                data: {
-                    'box_id_x':x,
-                    'box_id_y':y,
-                    'player_id': player,
-                    '_token': '{{ csrf_token() }}'
-                },
-                success: function(data){
-                    if(data.success){
-                        $('#'+x+y).children('div').css('background-color', sign);
-                        checkTurn();
-                    }else if(data.error){
-                        alert(data.error);
-                    }
+            if(status == 1){
+                if(player == 1){
+                    var sign = 'player1';
+                }else{
+                    var sign = 'player2';
                 }
-            });
+
+                $.ajax({
+                    url: '{{ url("/set-move/") }}',
+                    datatype: 'json',
+                    type: 'post',
+                    data: {
+                        'box_id_x':x,
+                        'box_id_y':y,
+                        'player_id': player,
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    success: function(data){
+                        if(data.success){
+                            $('#'+x+y).children('div').addClass(sign);
+                            checkResult(player,x,y);
+                        }else if(data.error){
+                            alert(data.error);
+                        }
+                    }
+                });
+            }
         }
     </script>
 @endsection

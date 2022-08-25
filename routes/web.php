@@ -18,4 +18,6 @@ Route::get('/', [GameController::class, 'index']);
 Route::post('/startNewGame/', [GameController::class, 'startGame']);
 Route::post('/set-move/', [GameController::class, 'createMove']);
 Route::get('/check-turn/', [GameController::class, 'checkTurn']);
+Route::get('/check-result/{id}/{x}/{y}', [GameController::class, 'checkResults']);
+Route::get('/game-reset/', [GameController::class, 'resetGame']);
 Route::get('/load-game-Board/', [GameController::class, 'gameBoard'])->name('Game.bord');

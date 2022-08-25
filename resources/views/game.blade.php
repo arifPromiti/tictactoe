@@ -52,7 +52,7 @@
                         <div align="center">
                             @for($i = 0; $i < $gameInfo->bordLength; $i++)
                                 @for($j = 0; $j < $gameInfo->bordLength; $j++)
-                                    <a class="tilece-a" href="javascript:makeMove({{ $i.','.$j }});"><div id="{{ $i.$j }}" class="tiles"></div></a>
+                                    <a class="tilece-a" id="{{ $i.$j }}" href="javascript:makeMove({{ $i.','.$j }});"><div class="tiles"></div></a>
                                 @endfor
                                 <br>
                             @endfor
@@ -84,18 +84,33 @@
 
         function makeMove(x,y){
             console.log(x,y);
-            {{--$.ajax({--}}
-            {{--    url: '{{ url("/set-move/") }}',--}}
-            {{--    datatype: 'json',--}}
-            {{--    type: 'post',--}}
-            {{--    data: {--}}
-            {{--        'name': name,--}}
-            {{--        '_token': '{{ csrf_token() }}'--}}
-            {{--    },--}}
-            {{--    success: function (data) {--}}
+            var player = $('#player').val();
 
-            {{--    }--}}
-            {{--});--}}
+            if(player == 1){
+               var sign = 'green';
+            }else{
+                var sign = 'red';
+            }
+
+            $.ajax({
+                url: '{{ url("/set-move/") }}',
+                datatype: 'json',
+                type: 'post',
+                data: {
+                    'box_id_x':x,
+                    'box_id_y':y,
+                    'player_id': player,
+                    '_token': '{{ csrf_token() }}'
+                },
+                success: function(data){
+                    if(data.success){
+                        $('#'+x+y).children('div').css('background-color', sign);
+                        checkTurn();
+                    }else if(data.error){
+                        alert(data.error);
+                    }
+                }
+            });
         }
     </script>
 @endsection

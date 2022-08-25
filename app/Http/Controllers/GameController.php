@@ -71,10 +71,11 @@ class GameController extends Controller
     }
 
     public function createMove(Request $request){
-        $box_id = $request->input('box_id');
+        $box_id_x = $request->input('box_id_x');
+        $box_id_y = $request->input('box_id_y');
         $player = $request->input('player_id');
 
-        $check = $this->boxIdCheck($box_id);
+        $check = $this->boxIdCheck($box_id_x,$box_id_y);
 
         if($check > 0){
             return ['warning' => 'used'];
@@ -84,7 +85,8 @@ class GameController extends Controller
                 GameHistory::create([
                     'game_id' => 1,
                     'player_id' => $player,
-                    'box_id' => $box_id,
+                    'box_id_x' => $box_id_x,
+                    'box_id_y' => $box_id_y,
                     'status' => 0
                 ]);
 
@@ -98,13 +100,13 @@ class GameController extends Controller
             }
 
             if($result){
-                return ['success' => $result];
+                return ['success' => 'added !'];
             }
         }
     }
 
-    public function boxIdCheck($id){
-        return GameHistory::where('box_id','=',$id)->count('id');
+    public function boxIdCheck($x,$y){
+        return GameHistory::where([['box_id_x','=',$x],['box_id_y','=',$y]])->count('id');
     }
 
     public function checkTurn(){

@@ -61,7 +61,7 @@
 @section('js')
     <script>
         $(function(){
-            checkTurn()
+            checkTurn();
         });
 
         function checkTurn(){

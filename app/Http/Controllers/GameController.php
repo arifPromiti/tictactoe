@@ -148,28 +148,28 @@ class GameController extends Controller
     }
 
     public function checkResults($id,$x,$y){
-        $vertical = $this->verticalCheck($id,$x,$y);
-        $horizontal = $this->horizontalCheck($id,$x,$y);
-        $topDiagonal = $this->topLeftDiagonalCheck($id,$x,$y);
-        $bottomDiagonal = $this->bottomLeftDiagonalCheck($id,$x,$y);
+        $vertical = $this->verticalCheck($id,$y);
+        $horizontal = $this->horizontalCheck($id,$x);
+        $topDiagonal = $this->topLeftDiagonalCheck($id);
+        $bottomDiagonal = $this->bottomLeftDiagonalCheck($id);
         $gameInfo = $this->gameInfo();
         $totalMove = GameHistory::where('status','=',0)->count('id');
 
-        if($horizontal == 1 || $vertical == 1 || $topDiagonal == 1 || $bottomDiagonal == 1){
+        if($gameInfo->max_move == $totalMove){
+            Game::where('id','=',1)->update(['status' => 3]);
+
+            return ['sorry' => 'It is a Tie!'];
+        }else if($horizontal == 1 || $vertical == 1 || $topDiagonal == 1 || $bottomDiagonal == 1){
             Game::where('id','=',1)->update(['status' => 2]);
             $player = $this->playerInfo($id);
 
             return ['success' => $player->name.' Congratulation !'];
-        }else if($gameInfo->max_move == $totalMove){
-            Game::where('id','=',1)->update(['status' => 3]);
-
-            return ['sorry' => 'It is a Tie!'];
         }else{
             return ['continue' => 1];
         }
     }
 
-    public function verticalCheck($id,$x,$y){
+    public function verticalCheck($id,$y){
         $playerHistory = $this->getAllHistory($id);
         $gameInfo = $this->gameInfo();
 
@@ -184,7 +184,7 @@ class GameController extends Controller
         return ($a >= $gameInfo->bordLength)? 1:0;
     }
 
-    public function horizontalCheck($id,$x,$y){
+    public function horizontalCheck($id,$x){
         $playerHistory = $this->getAllHistory($id);
         $gameInfo = $this->gameInfo();
 
@@ -199,59 +199,36 @@ class GameController extends Controller
         return ($a >= $gameInfo->bordLength)? 1:0;
     }
 
-    public function topLeftDiagonalCheck($id,$x,$y){
+    public function topLeftDiagonalCheck($id){
         $playerHistory = $this->getAllHistory($id);
         $gameInfo = $this->gameInfo();
 
         $a = 0;
-        for($i = $x; $i > 0; $i--){
-            for($j = $y; $j < $gameInfo->bordLength; $j++){
-                foreach ($playerHistory as $row){
-                    if($row->box_id_x == $i && $row->box_id_y == $j){
-                        $a++;
-                    }
+        for($i = 0; $i < $gameInfo->bordLength; $i++){
+            foreach ($playerHistory as $row){
+                if($row->box_id_x == $i && $row->box_id_y == $i){
+                    $a++;
                 }
             }
         }
 
-        $b = 0;
-        for($j = $y; $j > 0; $j--) {
-            for($i = $x; $i < $gameInfo->bordLength; $i++){
-                foreach ($playerHistory as $row){
-                    if($row->box_id_x == $i && $row->box_id_y == $j){
-                        $b++;
-                    }
-                }
-            }
-        }
-        return ($a+$b >= $gameInfo->bordLength)? 1:0;
+        return ($a == $gameInfo->bordLength)? 1:0;
     }
 
-    public function bottomLeftDiagonalCheck($id,$x,$y){
+    public function bottomLeftDiagonalCheck($id){
         $playerHistory = $this->getAllHistory($id);
         $gameInfo = $this->gameInfo();
 
         $a = 0;
-        for($i = $x; $i > 0;  $i--) {
-            for($j = $y; $j > 0; $j--){
-                foreach ($playerHistory as $row){
-                    if($row->box_id_x == $i && $row->box_id_y == $j){
-                        $a++;
-                    }
+        $i = $gameInfo->bordLength;
+        for($j = 0; $j < $gameInfo->bordLength;  $j++){
+            $i = $i-1;
+            foreach ($playerHistory as $row){
+                if($row->box_id_x == $i && $row->box_id_y == $j){
+                    $a++;
                 }
             }
         }
-
-        $b = 0;
-        for($j = $y; $j < $gameInfo->bordLength; $j++){
-            for($i = $x; $i < $gameInfo->bordLength; $i++){
-                foreach ($playerHistory as $row){
-                    if($row->box_id_x == $i && $row->box_id_y == $j){
-                        $b++;
-                    }
-                }
-            }
-        }
-        return ($a+$b >= $gameInfo->bordLength)? 1:0;
+        return ($a == $gameInfo->bordLength)? 1:0;
     }
 }
